@@ -24,18 +24,17 @@ class ChatRequest(BaseModel):
 @app.post("/chat")
 async def chat(request: ChatRequest):
     system_prompt = f"""
-Bạn là nhân viên bán hàng CHUYÊN NGHIỆP NHẤT, nhiệt tình, thuyết phục cao, chuyên chốt đơn.
-Thông tin sản phẩm chính:
+Bạn là nhân viên bán hàng SIÊU CHI TIẾT và THUYẾT PHỤC nhất.
+Thông tin sản phẩm ĐẦY ĐỦ từ trang (đọc sâu 100%):
 {request.context}
 
-Chiến lược trả lời (bắt buộc tuân thủ):
-- Tạo Attention: Mở đầu hấp dẫn, khen khách có gu hoặc nhấn mạnh sản phẩm HOT.
-- Xây Interest & Desire: Giới thiệu CHI TIẾT lợi ích, ưu điểm nổi bật, giải quyết đau điểm khách (dùng từ khóa từ sản phẩm tự nhiên).
-- Xử lý objection: Nếu khách phân vân giá/size/chất lượng → phản biện nhẹ nhàng + social proof ("Hơn 1000 khách đã mua và đánh giá 5 sao").
-- Tạo urgency: "Hàng đang cháy, chỉ còn ít cái", "Khuyến mãi chỉ hôm nay", "Nhiều khách đang đặt".
-- CTA MẠNH: Luôn kết thúc bằng hành động cụ thể → "Anh/chị chốt đơn em ship ngay nhé? 📦", "Để em giữ hàng, anh/chị cho size/màu nhé!", hoặc gợi hỏi SĐT.
-- Trả lời NGẮN GỌN (200-300 từ), thân thiện, thêm emoji, tiếng Việt tự nhiên.
-- Nếu có hình sản phẩm → nói "Em gửi hình chi tiết đây ạ 👇".
+Chiến lược trả lời:
+- Dùng toàn bộ thông tin chi tiết (mô tả đầy đủ, thông số kỹ thuật, hình ảnh) để giới thiệu sản phẩm một cách hấp dẫn.
+- Nếu có bảng thông số → tóm tắt nổi bật + nhấn mạnh ưu điểm.
+- Hiển thị nhiều hình: "Em gửi thêm hình chi tiết đây ạ 👇".
+- Tạo urgency + social proof + xử lý objection mạnh mẽ.
+- CTA chốt đơn cụ thể: hỏi size/màu/SĐT, gợi "Chốt ngay em giữ hàng".
+- Trả lời tiếng Việt tự nhiên, ngắn gọn nhưng ĐẦY ĐỦ thông tin, thêm emoji.
 """.strip()
 
     limited_history = request.history[-8:]
@@ -49,8 +48,8 @@ Chiến lược trả lời (bắt buộc tuân thủ):
     response = openai.chat.completions.create(
         model="gpt-4o-mini",
         messages=messages,
-        temperature=0.9,  # Tăng sáng tạo để thuyết phục tự nhiên hơn
-        max_tokens=350
+        temperature=0.9,
+        max_tokens=450  # Tăng chút để reply chi tiết hơn
     )
 
     reply = response.choices[0].message.content
