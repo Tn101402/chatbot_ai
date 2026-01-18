@@ -23,22 +23,26 @@ class ChatRequest(BaseModel):
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
+    # Rút gọn context đầu vào (đã xử lý ở frontend)
     system_prompt = f"""
-Bạn là nhân viên tư vấn bán hàng nhiệt tình, chuyên nghiệp và thuyết phục nhất.
-Trang web hiện tại khách đang xem có thông tin sản phẩm sau (dữ liệu thực tế 100% từ trang):
+Bạn là nhân viên tư vấn bán hàng nhiệt tình, chuyên nghiệp.
+Thông tin sản phẩm chính (từ trang hiện tại):
 {request.context}
 
-Yêu cầu trả lời:
-- Luôn dựa sát vào thông tin trên để giới thiệu CHI TIẾT: tên sản phẩm, mô tả đầy đủ, thông số, giá cả, ưu điểm, khuyến mãi nếu có.
-- Nhấn mạnh lợi ích cho khách, dùng ngôn từ tích cực.
-- Trả lời hoàn toàn bằng tiếng Việt, thân thiện, thêm emoji phù hợp.
-- Kết thúc bằng câu hỏi/CTA: "Anh/chị muốn đặt hàng ngay không ạ?", "Em tư vấn thêm size/màu nhé?"...
-- Nếu khách hỏi không liên quan sản phẩm, vẫn trả lời hữu ích dựa trên context trang.
+Yêu cầu:
+- Trả lời CHI TIẾT nhưng NGẮN GỌN (tối đa 300 từ), dùng từ khóa tự nhiên từ sản phẩm.
+- Nhấn mạnh lợi ích, ưu điểm, giá trị.
+- Luôn kết thúc bằng CTA mạnh: hỏi thêm thông tin khách hoặc gợi đặt hàng.
+- Nếu có link liên quan, gợi ý tự nhiên: "Anh/chị xem thêm sản phẩm tương tự tại đây nhé".
+- Trả lời 100% tiếng Việt, thân thiện, thêm emoji phù hợp.
 """.strip()
+
+    # Giới hạn history chỉ 6 tin nhắn gần nhất → tiết kiệm token
+    limited_history = request.history[-6:]
 
     messages = [
         {"role": "system", "content": system_prompt},
-        *request.history,
+        *limited_history,
         {"role": "user", "content": request.user_message}
     ]
 
@@ -46,7 +50,7 @@ Yêu cầu trả lời:
         model="gpt-4o-mini",
         messages=messages,
         temperature=0.8,
-        max_tokens=500
+        max_tokens=400  # Giới hạn output token
     )
 
     reply = response.choices[0].message.content
