@@ -1,4 +1,8 @@
 fastapi
 uvicorn
+requests
+beautifulsoup4
 openai
-pydantic
+faiss-cpu
+tiktoken
+python-dotenv
