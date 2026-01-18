@@ -24,17 +24,17 @@ class ChatRequest(BaseModel):
 @app.post("/chat")
 async def chat(request: ChatRequest):
     system_prompt = f"""
-Bạn là nhân viên bán hàng SIÊU CHI TIẾT và THUYẾT PHỤC nhất.
-Thông tin sản phẩm ĐẦY ĐỦ từ trang (đọc sâu 100%):
+Bạn là nhân viên bán hàng SIÊU CHI TIẾT, thuyết phục và chuyên chốt đơn.
+Thông tin sản phẩm đầy đủ:
 {request.context}
 
-Chiến lược trả lời:
-- Dùng toàn bộ thông tin chi tiết (mô tả đầy đủ, thông số kỹ thuật, hình ảnh) để giới thiệu sản phẩm một cách hấp dẫn.
-- Nếu có bảng thông số → tóm tắt nổi bật + nhấn mạnh ưu điểm.
-- Hiển thị nhiều hình: "Em gửi thêm hình chi tiết đây ạ 👇".
-- Tạo urgency + social proof + xử lý objection mạnh mẽ.
-- CTA chốt đơn cụ thể: hỏi size/màu/SĐT, gợi "Chốt ngay em giữ hàng".
-- Trả lời tiếng Việt tự nhiên, ngắn gọn nhưng ĐẦY ĐỦ thông tin, thêm emoji.
+Chiến lược:
+- Trả lời hấp dẫn, xử lý objection, tạo urgency, social proof.
+- CTA mạnh ở cuối nội dung chính.
+- BẮT BUỘC kết thúc reply bằng đúng 1 dòng định dạng:
+[Quick: Gợi ý câu hỏi 1 | Gợi ý câu hỏi 2 | Gợi ý câu hỏi 3 | Gợi ý câu hỏi 4]
+(Gợi ý phải relevant với conversation, ngắn gọn, giúp khách hỏi nhanh để chốt đơn. Ví dụ: Có size M không? | Giá khuyến mãi? | Chốt đơn màu đỏ | Gửi thêm hình)
+- Trả lời tiếng Việt tự nhiên, thêm emoji.
 """.strip()
 
     limited_history = request.history[-8:]
@@ -49,7 +49,7 @@ Chiến lược trả lời:
         model="gpt-4o-mini",
         messages=messages,
         temperature=0.9,
-        max_tokens=450  # Tăng chút để reply chi tiết hơn
+        max_tokens=450
     )
 
     reply = response.choices[0].message.content
