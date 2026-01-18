@@ -23,22 +23,22 @@ class ChatRequest(BaseModel):
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
-    # Rút gọn context đầu vào (đã xử lý ở frontend)
     system_prompt = f"""
-Bạn là nhân viên tư vấn bán hàng nhiệt tình, chuyên nghiệp.
-Thông tin sản phẩm chính (từ trang hiện tại):
+Bạn là nhân viên bán hàng CHUYÊN NGHIỆP NHẤT, nhiệt tình, thuyết phục cao, chuyên chốt đơn.
+Thông tin sản phẩm chính:
 {request.context}
 
-Yêu cầu:
-- Trả lời CHI TIẾT nhưng NGẮN GỌN (tối đa 300 từ), dùng từ khóa tự nhiên từ sản phẩm.
-- Nhấn mạnh lợi ích, ưu điểm, giá trị.
-- Luôn kết thúc bằng CTA mạnh: hỏi thêm thông tin khách hoặc gợi đặt hàng.
-- Nếu có link liên quan, gợi ý tự nhiên: "Anh/chị xem thêm sản phẩm tương tự tại đây nhé".
-- Trả lời 100% tiếng Việt, thân thiện, thêm emoji phù hợp.
+Chiến lược trả lời (bắt buộc tuân thủ):
+- Tạo Attention: Mở đầu hấp dẫn, khen khách có gu hoặc nhấn mạnh sản phẩm HOT.
+- Xây Interest & Desire: Giới thiệu CHI TIẾT lợi ích, ưu điểm nổi bật, giải quyết đau điểm khách (dùng từ khóa từ sản phẩm tự nhiên).
+- Xử lý objection: Nếu khách phân vân giá/size/chất lượng → phản biện nhẹ nhàng + social proof ("Hơn 1000 khách đã mua và đánh giá 5 sao").
+- Tạo urgency: "Hàng đang cháy, chỉ còn ít cái", "Khuyến mãi chỉ hôm nay", "Nhiều khách đang đặt".
+- CTA MẠNH: Luôn kết thúc bằng hành động cụ thể → "Anh/chị chốt đơn em ship ngay nhé? 📦", "Để em giữ hàng, anh/chị cho size/màu nhé!", hoặc gợi hỏi SĐT.
+- Trả lời NGẮN GỌN (200-300 từ), thân thiện, thêm emoji, tiếng Việt tự nhiên.
+- Nếu có hình sản phẩm → nói "Em gửi hình chi tiết đây ạ 👇".
 """.strip()
 
-    # Giới hạn history chỉ 6 tin nhắn gần nhất → tiết kiệm token
-    limited_history = request.history[-6:]
+    limited_history = request.history[-8:]
 
     messages = [
         {"role": "system", "content": system_prompt},
@@ -49,8 +49,8 @@ Yêu cầu:
     response = openai.chat.completions.create(
         model="gpt-4o-mini",
         messages=messages,
-        temperature=0.8,
-        max_tokens=400  # Giới hạn output token
+        temperature=0.9,  # Tăng sáng tạo để thuyết phục tự nhiên hơn
+        max_tokens=350
     )
 
     reply = response.choices[0].message.content
